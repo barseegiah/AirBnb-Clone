@@ -17,11 +17,40 @@
       </div>
 
       <div class="tab-content mt-4">
-        <!-- Listing of Places -->
+        <!-- Host Places -->
 
-        <!-- Mix place listing -->
+        <!-- places listing -->
         <div class="container-fluid m-0 tab-pane fade show active p-0" id="Tab1">
-          Content for Tab 1
+          <div class="row g-3">
+
+            <% place.forEach(place => { %>
+
+              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+                <div class="card border-0 bg-white" style="width: 100%;">
+
+                  <% if (place.base64Image) { %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                  <% } else { %>
+                    <p>No image available</p>
+                  <% } %>
+
+                  <div class="card-body p-1">
+                    <div class="d-flex justify-content-between mb-2">
+                      <h5 class="mb-0 w-50 fs-6 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                    </div>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <div class="d-flex justify-content-between mb-2">
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
+                    </div>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
+                  </div>
+                </div>
+              </a>
+
+            <%})%>
+
+          </div>
         </div>
 
         <div id="Tab2" class="tab-pane fade text-black">
@@ -53,7 +82,7 @@
                     <div class="mb-3">
                       <label for="propertyName" class="form-label text-black fw-bold">Property Name</label>
                       <input type="text" class="form-control" id="propertyName" name="propertyName" required
-                        placeholder="Property Name">
+                        placeholder="Property Name" value="Room in hotel">
                     </div>
 
                     <div class="mb-3">
@@ -76,7 +105,7 @@
                         <option value="">Select property type</option>
                         <option value="Apartment">Apartment</option>
                         <option value="House">House</option>
-                        <option value="Room">Room</option>
+                        <option value="Room" selected>Room</option>
                         <option value="Guest House">Guest House</option>
                         <option value="Experience">Explore (Cultural Experience)</option>
                       </select>
@@ -91,11 +120,11 @@
                     <h3 class="lodgeliberia_textcolor_color fw-bold">Location Information</h3>
                     <div class="mb-3">
                       <label for="address" class="form-label text-black fw-bold">Address</label>
-                      <input type="text" class="form-control" id="address" name="address" required>
+                      <input type="text" class="form-control" id="address" name="address" required value="Monrovia, Liberia">
                     </div>
                     <div class="mb-3">
                       <label for="city" class="form-label text-black fw-bold">City</label>
-                      <input type="text" class="form-control" id="city" name="city" required>
+                      <input type="text" class="form-control" id="city" name="city" required value="Monrovia">
                     </div>
                     <div class="mb-3">
                       <label for="county" class="form-label text-black fw-bold">County</label>
@@ -111,7 +140,7 @@
                         <option value="lofa">Lofa</option>
                         <option value="margibi">Margibi</option>
                         <option value="maryland">Maryland</option>
-                        <option value="montserrado">Montserrado</option>
+                        <option value="montserrado" selected>Montserrado</option>
                         <option value="nimba">Nimba</option>
                         <option value="rivercess">River Cess</option>
                         <option value="river-gee">River Gee</option>
@@ -129,15 +158,15 @@
                     <h3 class="lodgeliberia_textcolor_color fw-bold">Availability Information</h3>
                     <div class="mb-3">
                       <label for="startDate" class="form-label text-black fw-bold">Start Date</label>
-                      <input type="date" class="form-control" id="startDate" name="startDate" required>
+                      <input type="date" class="form-control" id="startDate" name="startDate" required value="2024-10-10">
                     </div>
                     <div class="mb-3">
                       <label for="minStayDays" class="form-label text-black fw-bold">Minimum Stay (Days)</label>
-                      <input type="number" class="form-control" id="minStayDays" name="minStayDays" required min="1">
+                      <input type="number" class="form-control" id="minStayDays" name="minStayDays" required min="1" value="2">
                     </div>
                     <div class="mb-3">
                       <label for="maxGuests" class="form-label text-black fw-bold">Maximum Guests</label>
-                      <input type="number" class="form-control" id="maxGuests" name="maxGuests" required min="1">
+                      <input type="number" class="form-control" id="maxGuests" name="maxGuests" required min="1" value="2">
                     </div>
                     <button type="button"
                       class="btn btn-custom prev-step lodgeliberia_background_color text-black fw-bold">Previous</button>
@@ -150,7 +179,7 @@
                     <h3 class="lodgeliberia_textcolor_color fw-bold">Pricing Information</h3>
                     <div class="mb-3">
                       <label for="price" class="form-label text-black fw-bold">Price per Night</label>
-                      <input type="number" class="form-control" id="price" name="price" required>
+                      <input type="number" class="form-control" id="price" name="price" required value="50">
                     </div>
                     <div class="mb-3">
                       <label for="currency" class="form-label text-black fw-bold">Currency</label>
@@ -171,13 +200,13 @@
                     <div class="mb-3">
                       <label for="briefDescriptionValue" class="form-label text-black fw-bold">Brief Description</label>
                       <input type="text" class="form-control" id="briefDescriptionValue" name="briefDescriptionValue"
-                        required>
+                        required value="Premium Room with Porch Lifestyle Luxury">
                     </div>
                     <div class="mb-3">
                       <label for="detailDescriptionValue" class="form-label text-black fw-bold">Detail
                         Description</label>
                       <textarea class="form-control" id="detailDescriptionValue" name="detailDescriptionValue" rows="3"
-                        required></textarea>
+                        required value="Premium Room with Porch Lifestyle Luxury"></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -219,7 +248,7 @@
                     <button type="button"
                       class="btn btn-custom prev-step lodgeliberia_background_color text-black fw-bold">Previous</button>
                     <button type="submit"
-                      class="btn btn-custom lodgeliberia_background_color text-black fw-bold">Submit</button>
+                      class="btn btn-custom lodgeliberia_background_color text-black fw-bold">Host Property</button>
                   </div>
                 </form>
 

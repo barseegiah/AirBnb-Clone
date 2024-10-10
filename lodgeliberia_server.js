@@ -50,12 +50,18 @@ function initializeDatabase() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 role TEXT NOT NULL,
                 fullname TEXT NOT NULL,
-                phone_number INTEGER NOT NULL,
+                phone_number TEXT,
                 email TEXT UNIQUE,
                 username TEXT NOT NULL,
-                password TEXT Not Null,
-                
-                time_created DATETIME DEFAULT CURRENT_TIMESTAMP
+                password TEXT NOT NULL,
+                profile_pic BLOB,
+                image_mime_type TEXT,
+                occupation TEXT,
+                education TEXT,
+                age INTEGER,
+                user_agreement BOOLEAN DEFAULT 0,
+                time_created DATETIME DEFAULT CURRENT_TIMESTAMP,
+                national_identification_card_verification BLOB
             )`,
             `CREATE TABLE IF NOT EXISTS host_listings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -159,18 +165,38 @@ server.post('/calculate-price', (req, res) => {
     res.json({ totalPrice, lodge_liberia_percent, total_plus_percentage });
 });
 
-// signup form post route
-server.post('/signup', (req, res) => {
-    const { fullname, phone_number, email, username, password } = req.body;
+
+// Signup form post route
+server.post('/signup', upload.single('profilePic'), (req, res) => {
+    const { fullname, phone_number, email, username, password, occupation, education, age, useragreement } = req.body;
+
+    // Check if the user uploaded a profile picture
+    const profilePic = req.file ? req.file.buffer : null;
+
+    // Get the mime type of the cover image
+    const profilePicMimeType = req.file ? req.file.mimetype : null;
 
     // Insert the new user data into the 'users' table
     const sql = `
-    INSERT INTO users (role, fullname, phone_number, email, username, password)
-    VALUES (?, ?, ?, ?, ?,?)
+    INSERT INTO users (role, fullname, phone_number, email, username, password, profile_picture, image_mime_type, occupation, education, age, user_agreement)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     // Run the SQL query
-    lodge_liberia_db.run(sql, ["guest", fullname, phone_number, email, username, password], function (err) {
+    lodge_liberia_db.run(sql, [
+        "guest", // role
+        fullname,
+        phone_number,
+        email,
+        username,
+        password,
+        profilePic, // Profile picture stored as binary
+        profilePicMimeType, // Profile picture mime_type
+        occupation,
+        education,
+        age,
+        useragreement === 'user agreement approval' ? 1 : 0 // Convert checkbox to boolean
+    ], function (err) {
         if (err) {
             console.error('Error inserting user into database:', err);
             return res.status(500).send('Error registering user');
@@ -307,8 +333,8 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
                             user: req.session.user, place: images, checkin: user_confirmation_data.checkin_date,
                             checkout: user_confirmation_data.checkout_date, roundedcost: user_confirmation_data.amount_total,
                             selected_place_title: user_confirmation_data.selected_place_title, account_owner_name: sessionUser.fullname,
-                            sender_name: user_confirmation_data.sender_name, 
-                            registered_phone_number: user_confirmation_data.sender_phone_number, 
+                            sender_name: user_confirmation_data.sender_name,
+                            registered_phone_number: user_confirmation_data.sender_phone_number,
                             place_location: place_location, payment_image: imageBase64, image_mime_type: row.image_mime_type // Pass the MIME type to the template
                         });
 
@@ -325,11 +351,11 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
 // Host Place Post Route
 server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { name: 'hosting_images[]' }]), (req, res) => {
     // Log the form data to check if everything is received
-    console.log('Form Data:', req.body);
+    // console.log('Form Data:', req.body);
 
-    // Check if the cover image and additional images are received
-    console.log('Cover Image:', req.files['host_cover_image']);
-    console.log('Additional Images:', req.files['hosting_images[]']);
+    // // Check if the cover image and additional images are received
+    // console.log('Cover Image:', req.files['host_cover_image']);
+    // console.log('Additional Images:', req.files['hosting_images[]']);
 
     const amenities = req.body['allAmenities[][]'];
 
@@ -346,7 +372,6 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
         minStayDays,
         maxGuests,
         price,
-        currency,
         briefDescriptionValue,
         detailDescriptionValue,
     } = req.body;
@@ -368,12 +393,12 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
     const availableFrom = startDate;
     const maxGuestsParsed = parseInt(maxGuests);
     const minStayDaysParsed = parseInt(minStayDays);
-    
+
     // Get the mime type of the cover image
     const coverImageMimeType = host_cover_image.mimetype;
 
     lodge_liberia_db.run(insertHostListingQuery, [
-        sessionUser,
+        sessionUser.id,
         propertyName,
         briefDescriptionValue,
         detailDescriptionValue,
@@ -429,6 +454,7 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
 
         // After everything is done, respond with success or redirect
         console.log("Everthing Enter Successfully.");
+        res.render('hosting', {user: req.session.user});
     });
 });
 
@@ -439,15 +465,16 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
 
 // ==== Get methods
 
-// login pAGE
+// Login Page Route
 server.get("/login", (req, res) => {
     res.render('login_signup', { errorMessage: null }); // Pass errorMessage as null or '' initially
 });
 
-// about page route
-// server.get("/about", (req, res) => {
-//     res.render('about');
-// });
+
+// About Page Route
+server.get("/about", (req, res) => {
+    res.render('about', { user: req.session.user });
+});
 
 
 // Home page route
@@ -463,6 +490,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -493,6 +521,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -524,6 +553,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -556,6 +586,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -588,6 +619,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -620,6 +652,7 @@ server.get("/", (req, res) => {
                 host_listings.description AS property_description,
                 host_listings.price_per_night AS property_price_per_night,
                 host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
                 host_listings.available_from,
                 -- Formatting the available_from date for better readability
                 CASE strftime('%m', host_listings.available_from)
@@ -663,6 +696,7 @@ server.get("/", (req, res) => {
             available_month: row.available_month,
             available_day: row.available_day,
             available_year: row.available_year,
+            image_mime_type: row.image_mime_type,
             // Convert BLOB image data to Base64 (if available)
             base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
         }));
@@ -681,6 +715,7 @@ server.get("/", (req, res) => {
                 available_month: row.available_month,
                 available_day: row.available_day,
                 available_year: row.available_year,
+                image_mime_type: row.image_mime_type,
                 // Convert BLOB image data to Base64 (if available)
                 base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
             }));
@@ -699,6 +734,7 @@ server.get("/", (req, res) => {
                     available_month: row.available_month,
                     available_day: row.available_day,
                     available_year: row.available_year,
+                    image_mime_type: row.image_mime_type,
                     // Convert BLOB image data to Base64 (if available)
                     base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
                 }));
@@ -717,6 +753,7 @@ server.get("/", (req, res) => {
                         available_month: row.available_month,
                         available_day: row.available_day,
                         available_year: row.available_year,
+                        image_mime_type: row.image_mime_type,
                         // Convert BLOB image data to Base64 (if available)
                         base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
                     }));
@@ -735,6 +772,7 @@ server.get("/", (req, res) => {
                             available_month: row.available_month,
                             available_day: row.available_day,
                             available_year: row.available_year,
+                            image_mime_type: row.image_mime_type,
                             // Convert BLOB image data to Base64 (if available)
                             base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
                         }));
@@ -753,6 +791,7 @@ server.get("/", (req, res) => {
                                 available_month: row.available_month,
                                 available_day: row.available_day,
                                 available_year: row.available_year,
+                                image_mime_type: row.image_mime_type,
                                 // Convert BLOB image data to Base64 (if available)
                                 base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
                             }));
@@ -909,9 +948,13 @@ server.get('/place_detail/:host_place_id', (req, res) => {
     const selected_place = req.params.host_place_id; // Get the property ID from the URL
 
     const sqlQuery = `
-        SELECT 
+        SELECT
+            users.id AS host_id,
             users.fullname AS host_name,
             users.profile_picture AS host_picture,
+            users.image_mime_type AS host_image_mime_type,
+            users.occupation AS user_occupation,
+            users.education AS user_education,
             host_listings.title AS property_title,
             host_listings.description AS property_description,
             host_listings.detail_description AS property_detail_description,
@@ -936,6 +979,7 @@ server.get('/place_detail/:host_place_id', (req, res) => {
             END AS available_month,
             strftime('%d', host_listings.available_from) AS available_day,
             strftime('%Y', host_listings.available_from) AS available_year,
+            host_images.image_mime_type AS image_mime_type, -- retrieve image mimie type
             host_images.image_data AS image_blob  -- Retrieve image BLOB data from the host_images table
         FROM users
         JOIN host_listings ON users.id = host_listings.user_id
@@ -952,8 +996,12 @@ server.get('/place_detail/:host_place_id', (req, res) => {
             // Group the results by listing, since there could be multiple rows for the same listing (due to multiple images)
             const propertyDetails = {
                 selected_place: selected_place,
+                host_id: rows[0].host_id,
                 host_name: rows[0].host_name,
                 host_picture: rows[0].host_picture ? Buffer.from(rows[0].host_picture).toString('base64') : null,
+                host_image_mime_type: rows[0].host_image_mime_type,
+                host_occupation: rows[0].user_occupation,
+                host_education: rows[0].user_education,
                 property_title: rows[0].property_title,
                 property_description: rows[0].property_description,
                 property_detail_description: rows[0].property_detail_description,
@@ -964,6 +1012,7 @@ server.get('/place_detail/:host_place_id', (req, res) => {
                 available_month: rows[0].available_month,
                 available_day: rows[0].available_day,
                 available_year: rows[0].available_year,
+                image_mime_type: rows[0].image_mime_type,
                 images: rows.map(row => row.image_blob ? Buffer.from(row.image_blob).toString('base64') : null) // Convert each BLOB to Base64
             };
 
@@ -1083,8 +1132,46 @@ server.get('/payment', requireLogin, async (req, res) => {
 
 // Host Place Route
 server.get('/hostplace', requireLogin, (req, res) => {
+
     // Store the original URL so the user can be redirected back after login
     req.session.returnTo = req.originalUrl;
+
+    // Access the session user
+    const sessionUser = req.session.user; //logged-in user and their ID is available in `req.user.id`
+
+    // User places hosted
+    const user_places_hosted = `
+                 SELECT 
+                users.fullname AS host_name,
+                host_listings.title AS property_title,
+                host_listings.id AS property_id,
+                host_listings.description AS property_description,
+                host_listings.price_per_night AS property_price_per_night,
+                host_listings.Images AS images,
+                host_listings.image_mime_type AS image_mime_type,
+                host_listings.available_from,
+                -- Formatting the available_from date for better readability
+                CASE strftime('%m', host_listings.available_from)
+                    WHEN '01' THEN 'January'
+                    WHEN '02' THEN 'February'
+                    WHEN '03' THEN 'March'
+                    WHEN '04' THEN 'April'
+                    WHEN '05' THEN 'May'
+                    WHEN '06' THEN 'June'
+                    WHEN '07' THEN 'July'
+                    WHEN '08' THEN 'August'
+                    WHEN '09' THEN 'September'
+                    WHEN '10' THEN 'October'
+                    WHEN '11' THEN 'November'
+                    WHEN '12' THEN 'December'
+                END AS available_month,
+                strftime('%d', host_listings.available_from) AS available_day,
+                strftime('%Y', host_listings.available_from) AS available_year
+            FROM users
+            JOIN host_listings ON users.id = host_listings.user_id
+            WHERE users.id = ${sessionUser.id}
+            `;
+
 
     // Query the database for amenities
     const query = `SELECT feature FROM places_features`; // Adjust the table/column names to match your DB
@@ -1094,25 +1181,179 @@ server.get('/hostplace', requireLogin, (req, res) => {
             return res.status(500).send('Error fetching amenities');
         }
 
-        // Render the hosting view and pass the user and amenities
-        res.render('hosting', { 
-            user: req.session.user, 
-            amenities: amenities // Pass the amenities to the template
-        });
+        // Fifth query to get only Rooms
+        lodge_liberia_db.all(user_places_hosted, [], (err, rooms_Rows) => {
+            if (err) throw err;
+
+            // Process Rooms rows and store in results object
+            const host_property = rooms_Rows.map(row => ({
+                host_name: row.host_name,
+                host_place_id: row.property_id,
+                property_title: row.property_title,
+                property_description: row.property_description,
+                property_price_per_night: row.property_price_per_night,
+                available_month: row.available_month,
+                available_day: row.available_day,
+                available_year: row.available_year,
+                image_mime_type: row.image_mime_type,
+                // Convert BLOB image data to Base64 (if available)
+                base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
+            }));
+
+            // Render the hosting view and pass the user and amenities
+            res.render('hosting', {
+                user: req.session.user,
+                place: host_property,
+                amenities: amenities // Pass the amenities to the template
+            });
+
+        })
+
     });
 });
 
 
 // User Profile Route
 server.get('/my_profile', requireLogin, (req, res) => {
-    res.render('my_profile', { user: req.session.user })
-})
 
-// About us route
-server.get('/about', (req, res) => {
-    res.render('about', { user: req.session.user })
-})
+    // Access the session user
+    const sessionUser = req.session.user;
 
+    const get_host_info_query = `
+        SELECT
+        users.fullname AS host_fullname,
+        users.education AS host_education,
+        users.occupation AS host_occupation,
+        users.phone_number AS host_phone_number,
+        users.email AS host_email,
+        users.profile_picture AS host_picture,
+        users.image_mime_type AS host_picture_mime_type,
+        users.age AS host_age
+        FROM users
+        WHERE users.id = ?
+    `;
+
+    lodge_liberia_db.all(get_host_info_query, [sessionUser.id], (err, host_info) => {
+        if (err) throw err;
+
+        // Process the host information and map it to the result object
+        const host_detail = host_info.map(row => ({
+            host_name: row.host_fullname,
+            host_education: row.host_education,
+            host_occupation: row.host_occupation,
+            host_phone_number: row.host_phone_number,
+            host_email: row.host_email,
+            host_picture: row.host_picture ? Buffer.from(row.host_picture).toString('base64') : null,
+            host_picture_mime_type: row.host_picture_mime_type,
+            host_age: row.host_age,
+        }));
+
+        console.log(host_detail);
+
+        res.render('my_profile', { user: req.session.user, place: host_detail });
+
+    });
+
+});
+
+// Host Profile Route
+server.get('/host_profile/:host_id', requireLogin, (req, res) => {
+
+    // About Host
+    const selected_host_id = req.params.host_id;
+    // console.log(selected_host);
+
+    const get_host_info_query = `
+        SELECT
+        users.fullname AS host_fullname,
+        users.education AS host_education,
+        users.occupation AS host_occupation,
+        users.phone_number AS host_phone_number,
+        users.email AS host_email,
+        users.profile_picture AS host_picture,
+        users.image_mime_type AS host_picture_mime_type,
+        users.age AS host_age
+        FROM users
+        WHERE users.id = ?
+    `;
+
+    lodge_liberia_db.all(get_host_info_query, [selected_host_id], (err, host_info) => {
+        if (err) throw err;
+
+        // Process the host information and map it to the result object
+        const host_detail = host_info.map(row => ({
+            host_name: row.host_fullname,
+            host_education: row.host_education,
+            host_occupation: row.host_occupation,
+            host_phone_number: row.host_phone_number,
+            host_email: row.host_email,
+            host_picture: row.host_picture ? Buffer.from(row.host_picture).toString('base64') : null,
+            host_picture_mime_type: row.host_picture_mime_type,
+            host_age: row.host_age,
+        }));
+
+        res.render('host_profile', { user: req.session.user, place: host_detail });
+
+    });
+
+});
+
+// My booking (Places booked by a user route configuration)
+server.get('/my_booking', requireLogin, (req, res) => {
+
+    // Access the session user
+    const sessionUser = req.session.user; //logged-in user and their ID is available in `req.user.id`
+
+    // User places hosted
+    const user_places_booked = `
+        SELECT
+
+        users.fullname AS hostname,
+        
+        -- Booking details
+        payment_confirmation.amount_paid AS total_amount_paid,
+        payment_confirmation.checkin AS checkin_date,
+        payment_confirmation.checkout AS checkout_date,
+
+        -- Property details
+        host_listings.title AS property_title,
+        host_listings.description AS property_description,
+        host_listings.Images AS images,
+        host_listings.image_mime_type AS image_mime_type
+
+    FROM 
+        payment_confirmation
+    JOIN 
+        host_listings ON payment_confirmation.place_id = host_listings.id
+    LEFT JOIN 
+        users ON host_listings.user_id = users.id  -- Join with the host (not the booking user)
+    WHERE 
+        payment_confirmation.user_id = ${sessionUser.id};  -- Filter by the booking user, not the host
+            `;
+
+    // Fifth query to get only Rooms
+    lodge_liberia_db.all(user_places_booked, [], (err, rooms_Rows) => {
+        if (err) throw err;
+
+        // Process Rooms rows and store in results object
+        host_property = rooms_Rows.map(row => ({
+            host_name: row.hostname,
+            property_title: row.property_title,
+            property_description: row.property_description,
+            checkin_date: row.checkin_date,
+            checkout_date: row.checkout_date,
+            total_paid: row.total_amount_paid,
+            image_mime_type: row.image_mime_type,
+            // Convert BLOB image data to Base64 (if available)
+            base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
+        }));
+
+        console.log(host_property)
+            ;
+        res.render('my_booking', { user: req.session.user, place: host_property });
+    });
+
+})
 
 
 // Logout Route

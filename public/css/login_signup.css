@@ -56,9 +56,17 @@
   text-decoration: none;
 }
 
-/* Card Footer Link Hover Styles */
-.card-footer a:hover {
-  text-decoration: underline; /* Underline on hover */
+/* Hide steps by default */
+.step {
+  display: none !important;
 }
 
-/* Close button styles can be omitted since modals/overlays are excluded */
+/* Active step is visible */
+.step.active {
+  display: block !important;
+}
+
+.is-invalid {
+  border-color: orange !important;
+}
+

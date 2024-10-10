@@ -8,7 +8,7 @@
 
         <div class="col-6 p-2 m-0 h-100">
           <div class="text-center h-100">
-            <img src="data:image/jpeg;base64,<%= place.images[0] %>" class="selected_place-images" alt="...">
+            <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[0] %>" class="selected_place-images" alt="...">
           </div>
         </div>
 
@@ -16,19 +16,19 @@
 
           <div class="m-0 row p-0 h-50">
             <div class="col-6 p-1 text-center m-0 h-100">
-              <img src="data:image/jpeg;base64,<%= place.images[1] %>" class="selected_place-images" alt="...">
+              <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[0] %>" class="selected_place-images" alt="...">
             </div>
             <div class="col-6 p-1 text-center m-0 h-100">
-              <img src="data:image/jpeg;base64,<%= place.images[2] %>" class="selected_place-images" alt="...">
+              <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[1] %>" class="selected_place-images" alt="...">
             </div>
           </div>
 
           <div class="m-0 row p-0 h-50">
             <div class="col-6 p-1 text-center m-0 h-100">
-              <img src="data:image/jpeg;base64,<%= place.images[3] %>" class="selected_place-images" alt="...">
+              <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[2] %>" class="selected_place-images" alt="...">
             </div>
             <div class="col-6 p-1 text-center m-0 h-100">
-              <img src="data:image/jpeg;base64,<%= place.images[3] %>" class="selected_place-images" alt="...">
+              <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[3] %>" class="selected_place-images" alt="...">
             </div>
           </div>
 
@@ -47,7 +47,7 @@
       </div>
       <!-- Available for all screen sizes below md -->
 
-      <img src="data:image/jpeg;base64,<%= place.images[0] %>" class="selected_place-images" alt="...">
+      <img src="data:<%= place.image_mime_type %>;base64,<%= place.images[0] %>" class="selected_place-images" alt="...">
     </div>
 
     <!-- Place detail information -->
@@ -71,7 +71,7 @@
       <hr class="divider">
 
       <p class="text-black fw-normal fs-6 mb-0">
-        <img src="data:image/jpeg;base64,<%= place.host_picture %>" class="rounded-circle host_image_icon"
+        <img src="data:<%= place.host_image_mime_type %>;base64,<%= place.host_picture %>" class="rounded-circle host_image_icon"
           alt="...">&nbsp; <b>Hosted by <%= place.host_name %></b>
       </p>
 
@@ -111,11 +111,11 @@
                 Meet your Host
               </p>
   
-              <img src="data:image/jpeg;base64,<%= place.host_picture %>" class="rounded-circle host_image mt-2" alt="Host Image">
+              <img src="data:<%= place.host_image_mime_type %>;base64,<%= place.host_picture %>" class="rounded-circle host_image mt-2" alt="Host Image">
               <p class="text-black fs-5 fw-bolder mt-2 ps-2 mb-0"><%= place.host_name %> (Host)</p>
-              <p class="text-black fw-normal ps-2 mb-0">Education: <%= place.host_name %> (Host)</p>
-              <p class="text-black fw-normal ps-2 mb-0">My Job: <%= place.host_name %> (Host)</p>
-              <a href="#" class="ps-2 text-decoration-none lodgeliberia_textcolor_color fw-bold">More about me <i class="fa-solid fa-chevron-right" style="color: #FFA500;"></i></a>
+              <p class="text-black fw-normal ps-2 mb-0">Education: <%= place.host_education %></p>
+              <p class="text-black fw-normal ps-2 mb-0">My Job: <%= place.host_occupation %></p>
+              <a href="/host_profile/<%= place.host_id %>" class="ps-2 text-decoration-none lodgeliberia_textcolor_color fw-bold">More about me <i class="fa-solid fa-chevron-right" style="color: #FFA500;"></i></a>
              
             </div>
 
@@ -125,11 +125,11 @@
                 Meet your Host 
               </p>
   
-              <img src="data:image/jpeg;base64,<%= place.host_picture %>" class="rounded-circle host_image mt-2" alt="Host Image">
+              <img src="data:<%= place.host_image_mime_type %>;base64,<%= place.host_picture %>" class="rounded-circle host_image mt-2" alt="Host Image">
               <p class="text-black fs-5 fw-bolder mt-2 ps-2 mb-0"><%= place.host_name %> (Host)</p>
-              <p class="text-black fw-normal ps-2 mb-0">Education: <%= place.host_name %> (Host)</p>
-              <p class="text-black fw-normal ps-2 mb-0">My Job: <%= place.host_name %> (Host)</p>
-              <a href="#" class="ps-2 text-decoration-none lodgeliberia_textcolor_color fw-bold">More about me <i class="fa-solid fa-chevron-right" style="color: #FFA500;"></i></a>
+              <p class="text-black fw-normal ps-2 mb-0">Education: <%= place.host_education %></p>
+              <p class="text-black fw-normal ps-2 mb-0">Occupation: <%= place.host_occupation %></p>
+              <a href="/host_profile/<%= place.host_id %>" class="ps-2 text-decoration-none lodgeliberia_textcolor_color fw-bold">More about me <i class="fa-solid fa-chevron-right" style="color: #FFA500;"></i></a>
              
             </div>
 
@@ -347,7 +347,7 @@
 
 
   <!-- Floating Button (Position Fixed ) -->
-  <form class="container-fluid position-fixed bottom-0 phone-booking-section p-3 pt-0 d-md-none d-none" action="/payment" method="get" id="smd-booking-section">
+  <form class="container-fluid position-fixed bottom-0 phone-booking-section p-3 pt-0 d-md-none" action="/payment" method="get" id="smd-booking-section">
 
     <input type="hidden" name="selected_place_title" value="<%= place.property_title %>">
     <input type="hidden" name="selected_place_id" value="<%= place.selected_place %>">

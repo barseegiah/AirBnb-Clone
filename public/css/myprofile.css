@@ -1,11 +1,5 @@
 /* Custom card styling */
   .my-card {
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    color: #fff;
-    margin-top: -10px;
-    padding: 0.1rem;
     position: relative;
     overflow: visible; /* Allow overflow for the profile image */
   }
@@ -13,16 +7,15 @@
   /* Profile image styling */
   .profile_image {
     position: absolute;
-    top: -10px; /* Raised above the card */
+    top: -20px; /* Raised above the card */
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
     margin-top: -20px; /* Pull the image upwards */
   }
   
   /* Content padding adjustment */
   .content {
-    padding-top: 60px; /* Adjust padding to accommodate the profile image */
+    padding-top: 150px; /* Adjust padding to accommodate the profile image */
   }
   
   /* Card title styling */
@@ -36,20 +29,11 @@
   .card-text {
     color:black;
     font-size: 1.2rem;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
-
-  .my-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-  
 
   /* Responsive handling */
   @media (max-width: 768px) {
-    .my-card {
-      padding: 1.5rem;
-    }
 
     .content {
       padding-top: -50px;
@@ -68,4 +52,8 @@
 .profile_image {
     max-width: 30%;
     height: fit-content;
+}
+
+#return_btn {
+  cursor: pointer;
 }

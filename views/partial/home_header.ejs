@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
     crossorigin="anonymous">
-  <link href="style.css" type="text/css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-1.11.3.min.js" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
@@ -32,6 +31,7 @@
   <link rel="stylesheet" href="/public/css/hosting.css">
   <link rel="stylesheet" href="/public/css/cash_account.css">
   <link rel="stylesheet" href="/public/css/myprofile.css">
+  <link rel="stylesheet" href="/public/css/about.css">
 
   <!-- FontAwesome Link -->
   <script src="https://kit.fontawesome.com/9183ef123e.js" crossorigin="anonymous"></script>
@@ -90,6 +90,8 @@
               </ul>
             </div> -->
 
+
+            <!-- Login user Option Button -->
             <% if (user) { %>
               <!-- User Account button -->
             <div class="d-flex col justify-content-end">
@@ -101,7 +103,7 @@
                   <%= user.username %>
                 </button>
                 <div class="dropdown-menu bg-light border border-dark" aria-labelledby="dropdownMenuButton" style="max-width: 180px; min-width: 180px;">
-                  <a class="dropdown-item lodgeliberia_textcolor_color fw-bold" href="#">Places booked</a>
+                  <a class="dropdown-item lodgeliberia_textcolor_color fw-bold" href="/my_booking">My Booking</a>
                   <a class="dropdown-item lodgeliberia_textcolor_color fw-bold" href="/hostplace">Host Property</a>
                   <a class="dropdown-item lodgeliberia_textcolor_color fw-bold" href="/my_profile">Profile</a>
                   <a class="dropdown-item lodgeliberia_textcolor_color fw-bold" href="/logout">Logout</a>
@@ -109,6 +111,8 @@
               </div>            
             </div>
             <!-- User Account button -->
+
+            <!-- New user signup button -->
             <% } else { %>
               <!-- signup and login button -->
             <div class="d-flex col justify-content-end">

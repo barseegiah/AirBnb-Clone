@@ -1,0 +1,32 @@
+
+
+.second-fluid {
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.text-width {
+    max-width: 600px;
+    margin: 60px auto;
+}
+
+.text {
+    color: orange;
+}
+
+.third-fluid {
+    background-color: #F2F2F2;
+}
+
+.container {
+    padding: 30px;
+}
+
+.wrap {
+    margin: 70px auto;
+}
+
+.image img {
+    width: 330px;
+    border-radius: 10px;
+}

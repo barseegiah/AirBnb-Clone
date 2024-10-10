@@ -1,0 +1,55 @@
+<%- include("partial/home_header") %>
+
+  <main class="container-fluid mb-5">
+
+    <div class="container-fluid mt-2">
+      <div class="tab-container">
+        <ul class="nav nav-tabs flex-nowrap">
+          <li class="nav-item">
+            <a class="nav-link active fw-bold" onclick="openTab(event, 'Tab1')"><i class="fa-solid fa-gem"
+                style="color: #ffffff;"></i>&nbsp;My Booking</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content mt-4">
+        <!-- Host Places -->
+
+        <!-- places listing -->
+        <div class="container-fluid m-0 tab-pane fade show active p-0" id="Tab1">
+          <div class="row g-3">
+
+            <% place.forEach(place => { %>
+
+              <section class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+                <div class="card border-0 bg-white" style="width: 100%;">
+
+                  <% if (place.base64Image) { %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                  <% } else { %>
+                    <p>No image available</p>
+                  <% } %>
+
+                  <div class="card-body p-1">
+                    <div class="d-flex justify-content-between mb-2">
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="title prices mb-0">Amount Paid: <b>$<%= place.total_paid %>USD</b></p>
+                    </div>
+                    <p class="small mb-0">Checkin: <b><%= place.checkin_date %></b></p>
+                    <p class="small mb-2">Checkout: <b><%= place.checkout_date %></b></p>
+                    <div class="d-flex justify-content-between mb-2">
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
+                    </div>
+                    <p class="title fw-bold">Host: <%= place.host_name %></p>
+                  </div>
+                </div>
+              </section>
+
+            <%})%>
+
+          </div>
+        </div>
+
+      </div>
+  </main>
+  <%- include("partial/hosting_footer") %>

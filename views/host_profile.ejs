@@ -1,0 +1,63 @@
+<%- include("partial/home_header") %>
+
+    <main class="container mt-4 mb-5">
+
+        <div class="row justify-content-center pb-4 shadow">
+
+            <div class="d-flex justify-content-start">
+                <a onclick="window.history.back()" class="text-decoration-none p-2 fw-bold mb-2"
+                    id="return_btn">
+                    <i class="fa-solid fa-circle-chevron-left fa-2xl" style="color: #FFD43B;"></i>
+                </a>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="my-card container-fluid">
+                    
+                    <div class="text-center">
+
+                        <!-- Profile Image pushed to the top -->
+                        <img src="data:<%= place[0].host_picture_mime_type %>;base64,<%= place[0].host_picture %>"
+                            alt="profile-image" class="rounded-circle profile_image">
+
+                        <!-- Add padding-top to accommodate the image shift -->
+                        <div class="content">
+                            <!-- Name -->
+                            <h3 class="card-title mb-3">
+                                <%= place[0].host_name %>&nbsp; <i class="fa-solid fa-certificate"
+                                        style="color: #ffa500;"></i>
+                            </h3>
+
+                            <!-- Education -->
+                            <p class="card-text"><strong>Education:</strong>
+                                <%= place[0].host_education %>
+                            </p>
+
+                            <!-- Occupation -->
+                            <p class="card-text"><strong>Occupation:</strong>
+                                <%= place[0].host_occupation %>
+                            </p>
+
+                            <!-- Contact Number -->
+                            <p class="card-text"><strong>Phone:</strong>
+                                <%= place[0].host_phone_number %>
+                            </p>
+
+                            <!-- Email Address -->
+                            <p class="card-text"><strong>Email Address:</strong>
+                                <%= place[0].host_email %>
+                            </p>
+
+                            <!-- Age -->
+                            <p class="card-text"><strong>Age:</strong>
+                                <%= place[0].host_age %> yrs
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include("partial/home_footer") %>

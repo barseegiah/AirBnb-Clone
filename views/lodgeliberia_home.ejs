@@ -43,21 +43,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
@@ -77,21 +77,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
@@ -111,21 +111,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
@@ -145,21 +145,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
@@ -179,21 +179,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
@@ -213,21 +213,21 @@
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:image/jpeg;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
                   <% } else { %>
                     <p>No image available</p>
                   <% } %>
 
                   <div class="card-body p-1">
                     <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fs-6 fw-bolder"><%= place.property_title %></h5>
-                      <p class="card-text prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
+                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
+                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
                     </div>
-                    <p class="card-text mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
+                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
                     <div class="d-flex justify-content-between mb-2">
-                      <p class="card-text mb-0 w-100"><%= place.property_description %></p>
+                      <p class="small mb-0 w-100"><%= place.property_description %></p>
                     </div>
-                    <p class="card-text fw-bold">Hosted by <%= place.host_name %></p>
+                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
                   </div>
                 </div>
               </a>
