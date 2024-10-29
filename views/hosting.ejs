@@ -23,7 +23,7 @@
         <div class="container-fluid m-0 tab-pane fade show active p-0" id="Tab1">
           <div class="row g-3">
 
-            <% place.forEach(place => { %>
+            <% host_property.forEach(place => { %>
 
               <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
                 <div class="card border-0 bg-white" style="width: 100%;">
@@ -119,6 +119,10 @@
                   <div class="step" style="display: none;">
                     <h3 class="lodgeliberia_textcolor_color fw-bold">Location Information</h3>
                     <div class="mb-3">
+                      <label for="utility_bill" class="form-label text-black fw-bold">Please upload a recent utility bill (e.g., water, electricity, or internet) for address verification:</label>
+                      <input class="form-control" type="file" id="utility_bill" name="utility_bill" accept="image/*,application/pdf" required>
+                    </div>
+                    <div class="mb-3">
                       <label for="address" class="form-label text-black fw-bold">Address</label>
                       <input type="text" class="form-control" id="address" name="address" required value="Monrovia, Liberia">
                     </div>
@@ -197,6 +201,13 @@
                   <!-- Step 5: Additional Information -->
                   <div class="step" style="display: none;">
                     <h3 class="lodgeliberia_textcolor_color fw-bold">Additional Information</h3>
+                    <% if (!isIdCardUploaded) { %>
+                    <div class="mb-3">
+                      <label for="host_identification_card" class="form-label text-black fw-bold">Please upload a government-issued identification card (e.g., passport, national ID, or driver's license) for verification:</label>
+                      <input class="form-control" type="file" id="host_identification_card" name="host_identification_card"
+                        accept="image/*" required>
+                    </div>
+                    <% } %>
                     <div class="mb-3">
                       <label for="briefDescriptionValue" class="form-label text-black fw-bold">Brief Description</label>
                       <input type="text" class="form-control" id="briefDescriptionValue" name="briefDescriptionValue"
@@ -206,7 +217,7 @@
                       <label for="detailDescriptionValue" class="form-label text-black fw-bold">Detail
                         Description</label>
                       <textarea class="form-control" id="detailDescriptionValue" name="detailDescriptionValue" rows="3"
-                        required value="Premium Room with Porch Lifestyle Luxury"></textarea>
+                        required>Premium Room with Porch Lifestyle Luxury</textarea>
                     </div>
 
                     <div class="mb-3">

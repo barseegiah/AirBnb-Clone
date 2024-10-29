@@ -18,10 +18,12 @@
                 style="color: #ffffff;"></i>&nbsp;Houses</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-bold" onclick="openTab(event, 'Tab4')"><i class="fa-solid fa-person-shelter" style="color: #ffffff;"></i>&nbsp;Guest House</a>
+            <a class="nav-link fw-bold" onclick="openTab(event, 'Tab4')"><i class="fa-solid fa-person-shelter"
+                style="color: #ffffff;"></i>&nbsp;Guest House</a>
           </li>
           <li class="nav-item"></li>
-            <a class="nav-link fw-bold" onclick="openTab(event, 'Tab5')"><i class="fa-solid fa-bed" style="color: #ffffff;"></i>&nbsp;Rooms</a>
+          <a class="nav-link fw-bold" onclick="openTab(event, 'Tab5')"><i class="fa-solid fa-bed"
+              style="color: #ffffff;"></i>&nbsp;Rooms</a>
           </li>
           <li class="nav-item">
             <a class="nav-link fw-bold" onclick="openTab(event, 'Tab6')"><i class="fa-solid fa-dove"
@@ -37,32 +39,43 @@
         <div class="container-fluid m-0 tab-pane fade show active p-0" id="Tab1">
           <div class="row g-3">
 
-            <% allPlaces.forEach(place => { %>
+            <% allPlaces.forEach(place=> { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+              <a href="/place_detail/<%= place.host_place_id %>"
+                class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                      alt="..." style="height: 250px;">
+                    <% } else { %>
+                      <p>No image available</p>
+                      <% } %>
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
-                  </div>
+                        <div class="card-body p-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0 w-50 fw-bolder title">
+                              <%= place.property_title %>
+                            </h5>
+                            <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b>
+                            </p>
+                          </div>
+                          <p class="small mb-0">Available from: <b>
+                              <%= place.available_month %>
+                                <%= place.available_day %>, <%= place.available_year %>
+                            </b></p>
+                          <div class="d-flex justify-content-between mb-2">
+                            <p class="small mb-0 w-100">
+                              <%= place.property_description %>
+                            </p>
+                          </div>
+                          <p class="title fw-bold">Hosted by <%= place.host_name %>
+                          </p>
+                        </div>
                 </div>
               </a>
 
-            <%})%>
+              <%})%>
 
           </div>
         </div>
@@ -71,32 +84,43 @@
         <div id="Tab2" class="container-fluid m-0 tab-pane fade p-0">
           <div class="row g-3">
 
-            <% apartments.forEach(place => { %>
+            <% apartments.forEach(place=> { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+              <a href="/place_detail/<%= place.host_place_id %>"
+                class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                      alt="..." style="height: 250px;">
+                    <% } else { %>
+                      <p>No image available</p>
+                      <% } %>
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
-                  </div>
+                        <div class="card-body p-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0 w-50 fw-bolder title">
+                              <%= place.property_title %>
+                            </h5>
+                            <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b>
+                            </p>
+                          </div>
+                          <p class="small mb-0">Available from: <b>
+                              <%= place.available_month %>
+                                <%= place.available_day %>, <%= place.available_year %>
+                            </b></p>
+                          <div class="d-flex justify-content-between mb-2">
+                            <p class="small mb-0 w-100">
+                              <%= place.property_description %>
+                            </p>
+                          </div>
+                          <p class="title fw-bold">Hosted by <%= place.host_name %>
+                          </p>
+                        </div>
                 </div>
               </a>
 
-            <%})%>
+              <%})%>
 
           </div>
         </div>
@@ -105,32 +129,43 @@
         <div id="Tab3" class="container-fluid m-0 tab-pane fade p-0 text-black">
           <div class="row g-3">
 
-            <% houses.forEach(place => { %>
+            <% houses.forEach(place=> { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+              <a href="/place_detail/<%= place.host_place_id %>"
+                class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                      alt="..." style="height: 250px;">
+                    <% } else { %>
+                      <p>No image available</p>
+                      <% } %>
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
-                  </div>
+                        <div class="card-body p-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0 w-50 fw-bolder title">
+                              <%= place.property_title %>
+                            </h5>
+                            <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b>
+                            </p>
+                          </div>
+                          <p class="small mb-0">Available from: <b>
+                              <%= place.available_month %>
+                                <%= place.available_day %>, <%= place.available_year %>
+                            </b></p>
+                          <div class="d-flex justify-content-between mb-2">
+                            <p class="small mb-0 w-100">
+                              <%= place.property_description %>
+                            </p>
+                          </div>
+                          <p class="title fw-bold">Hosted by <%= place.host_name %>
+                          </p>
+                        </div>
                 </div>
               </a>
 
-            <%})%>
+              <%})%>
 
           </div>
         </div>
@@ -139,100 +174,156 @@
         <div id="Tab4" class="container-fluid m-0 tab-pane fade p-0 text-black">
           <div class="row g-3">
 
-            <% guest_houses.forEach(place => { %>
+            <!-- Check if guest_houses array exists and is not empty -->
+            <% if (guest_houses && guest_houses.length> 0) { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
-                <div class="card border-0 bg-white" style="width: 100%;">
+              <% guest_houses.forEach(place=> { %>
 
-                  <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                <a href="/place_detail/<%= place.host_place_id %>"
+                  class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+                  <div class="card border-0 bg-white" style="width: 100%;">
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
+                    <% if (place.base64Image) { %>
+                      <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                        alt="..." style="height: 250px;">
+                      <% } else { %>
+                        <p>No image available</p>
+                        <% } %>
+
+                          <div class="card-body p-1">
+                            <div class="d-flex justify-content-between mb-2">
+                              <h5 class="mb-0 w-50 fw-bolder title">
+                                <%= place.property_title %>
+                              </h5>
+                              <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>
+                                    USD</b></p>
+                            </div>
+                            <p class="small mb-0">Available from: <b>
+                                <%= place.available_month %>
+                                  <%= place.available_day %>, <%= place.available_year %>
+                              </b></p>
+                            <div class="d-flex justify-content-between mb-2">
+                              <p class="small mb-0 w-100">
+                                <%= place.property_description %>
+                              </p>
+                            </div>
+                            <p class="title fw-bold">Hosted by <%= place.host_name %>
+                            </p>
+                          </div>
                   </div>
-                </div>
-              </a>
+                </a>
 
-            <%})%>
+                <% }) %>
+
+                  <% } else { %>
+                    <!-- Display this message if there are no guest houses available -->
+                    <div class="container-fluid pt-5 text-center">
+                      <p class="text-black title">There are no available Guest Properties at the moment...</p>
+                    </div>
+                    <% } %>
 
           </div>
         </div>
+
 
         <!-- Rooms Tab -->
         <div id="Tab5" class="container-fluid m-0 tab-pane fade p-0 text-black">
           <div class="row g-3">
 
-            <% rooms.forEach(place => { %>
+            <% rooms.forEach(place=> { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+              <a href="/place_detail/<%= place.host_place_id %>"
+                class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
                 <div class="card border-0 bg-white" style="width: 100%;">
 
                   <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                      alt="..." style="height: 250px;">
+                    <% } else { %>
+                      <p>No image available</p>
+                      <% } %>
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
-                  </div>
+                        <div class="card-body p-1">
+                          <div class="d-flex justify-content-between mb-2">
+                            <h5 class="mb-0 w-50 fw-bolder title">
+                              <%= place.property_title %>
+                            </h5>
+                            <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b>
+                            </p>
+                          </div>
+                          <p class="small mb-0">Available from: <b>
+                              <%= place.available_month %>
+                                <%= place.available_day %>, <%= place.available_year %>
+                            </b></p>
+                          <div class="d-flex justify-content-between mb-2">
+                            <p class="small mb-0 w-100">
+                              <%= place.property_description %>
+                            </p>
+                          </div>
+                          <p class="title fw-bold">Hosted by <%= place.host_name %>
+                          </p>
+                        </div>
                 </div>
               </a>
 
-            <%})%>
+              <%})%>
 
           </div>
         </div>
 
-        <!-- Cultural Eperience/s -->
+        <!-- Cultural Experience/s -->
         <div id="Tab6" class="container-fluid m-0 tab-pane fade p-0 text-black">
           <div class="row g-3">
 
-            <% experiences.forEach(place => { %>
+            <!-- Check if experiences array exists and is not empty -->
+            <% if (experiences && experiences.length> 0) { %>
 
-              <a href="/place_detail/<%= place.host_place_id %>" class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
-                <div class="card border-0 bg-white" style="width: 100%;">
+              <% experiences.forEach(place=> { %>
 
-                  <% if (place.base64Image) { %>
-                    <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img" alt="..." style="height: 250px;">
-                  <% } else { %>
-                    <p>No image available</p>
-                  <% } %>
+                <a href="/place_detail/<%= place.host_place_id %>"
+                  class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 place-content shadow">
+                  <div class="card border-0 bg-white" style="width: 100%;">
 
-                  <div class="card-body p-1">
-                    <div class="d-flex justify-content-between mb-2">
-                      <h5 class="mb-0 w-50 fw-bolder title"><%= place.property_title %></h5>
-                      <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>USD</b></p>
-                    </div>
-                    <p class="small mb-0">Available from: <b><%= place.available_month %> <%= place.available_day %>, <%= place.available_year %></b></p>
-                    <div class="d-flex justify-content-between mb-2">
-                      <p class="small mb-0 w-100"><%= place.property_description %></p>
-                    </div>
-                    <p class="title fw-bold">Hosted by <%= place.host_name %></p>
+                    <% if (place.base64Image) { %>
+                      <img src="data:<%= place.image_mime_type %>;base64,<%= place.base64Image %>" class="place-img"
+                        alt="..." style="height: 250px;">
+                      <% } else { %>
+                        <p>No image available</p>
+                        <% } %>
+
+                          <div class="card-body p-1">
+                            <div class="d-flex justify-content-between mb-2">
+                              <h5 class="mb-0 w-50 fw-bolder title">
+                                <%= place.property_title %>
+                              </h5>
+                              <p class="small prices mb-0">Price per day: <b>$<%= place.property_price_per_night %>
+                                    USD</b>
+                              </p>
+                            </div>
+                            <p class="small mb-0">Available from: <b>
+                                <%= place.available_month %>
+                                  <%= place.available_day %>, <%= place.available_year %>
+                              </b></p>
+                            <div class="d-flex justify-content-between mb-2">
+                              <p class="small mb-0 w-100">
+                                <%= place.property_description %>
+                              </p>
+                            </div>
+                            <p class="title fw-bold">Hosted by <%= place.host_name %>
+                            </p>
+                          </div>
                   </div>
-                </div>
-              </a>
+                </a>
 
-            <%})%>
+                <% }) %>
+
+                  <% } else { %>
+                    <!-- Display this message if there are no cultural experiences available -->
+                    <div class="container-fluid pt-5 text-center">
+                      <p class="text-black title">There are no available Cultural Experiences at the moment
+                      </p>
+                    </div>
+                    <% } %>
 
           </div>
         </div>

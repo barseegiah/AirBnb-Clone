@@ -1,0 +1,37 @@
+<%- include("partial/home_header") %>
+
+<main class="container-fluid mb-5">
+<div class="container">
+    <div class="contact-container">
+        <h2 class="lodgeliberia_textcolor_color fw-bold">Contact Us</h2>
+        <form action="/submit-contact-form" method="POST">
+            <div class="form-group mb-3">
+                <label for="name" class="text-black fw-bold">Full Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="email" class="text-black fw-bold">Email Address:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="phone" class="text-black fw-bold">Phone Number:</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="message" class="text-black fw-bold">Message:</label>
+                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn lodgeliberia_background_color text-black fw-bold">Send Message</button>
+        </form>
+
+        <div class="contact-info mt-5">
+            <h4 class="lodgeliberia_textcolor_color fw-bold">Our Contact Information:</h4>
+            <p class="text-black fw-bold"><strong>Phone:</strong> +231 770 722 633</p>
+            <p class="text-black fw-bold"><strong>Email:</strong> contact@lodgeliberia.com</p>
+            <p class="text-black fw-bold"><strong>Address:</strong> Lodge Liberia Headquarters, Monrovia, Liberia</p>
+        </div>
+    </div>
+</div>
+</main>
+
+<%- include("partial/home_footer") %>

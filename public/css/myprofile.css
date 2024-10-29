@@ -50,8 +50,11 @@
   
 
 .profile_image {
-    max-width: 30%;
-    height: fit-content;
+  width: 150px; /* Fixed width */
+  height: 150px; /* Fixed height */
+  border-radius: 50%; /* Rounded circle */
+  object-fit: cover; /* Makes sure the image covers the whole area */
+  border: 3px solid #ddd; /* Optional border */
 }
 
 #return_btn {

@@ -1,6 +1,6 @@
 <%- include("partial/payment_header") %>
 
-  <main class="container-fluid mb-4">
+  <main class="container-fluid flex-grow-1 mb-4">
 
     <!-- Available for all screen sizes above md -->
     <div class="container d-none d-md-block mb-0 shadow">
@@ -104,7 +104,7 @@
         <% if (payment_image && image_mime_type) { %>
           <div class="text-center">
             <img src="data:<%= image_mime_type %>;base64,<%= payment_image %>" alt="Payment Approval Image"
-              class=" img-thumbnail mt-0">
+              class=" img-thumbnail mt-0" id="payment_confirmation_image">
           </div>
         <% } 
         else { %>

@@ -2,11 +2,10 @@
 const express = require('express');
 const session = require('express-session');
 const server = express();
-const port = 5600;
+const port = 5200;
 const QRCode = require('qrcode');
 // =======================
 // Extended Modules Integration
-const path = require("path");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3");
 const multer = require("multer");
@@ -61,7 +60,8 @@ function initializeDatabase() {
                 age INTEGER,
                 user_agreement BOOLEAN DEFAULT 0,
                 time_created DATETIME DEFAULT CURRENT_TIMESTAMP,
-                national_identification_card_verification BLOB
+                national_identification_card_verification BLOB,
+                national_identification_card_verification_mime_type TEXT
             )`,
             `CREATE TABLE IF NOT EXISTS host_listings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,6 +78,8 @@ function initializeDatabase() {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 IMAGES BLOB NOT NULL,
                 image_mime_type TEXT,
+                address_verification BLOB,
+                address_verification_mime_type TEXT,
                 county TEXT NOT NULL,
                 city Text NOT NULL,
                 property_type TEXT NOT NULL,
@@ -245,6 +247,28 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
         return new Intl.DateTimeFormat('en-US', options).format(date); // Format the date
     }
 
+    // Covert Date from 'October 25, 2024' to 'YY-MM-DD'
+    function convertDateToYYYYMMDD(dateString) {
+        // Parse the date string
+        const date = new Date(dateString);
+
+        // Check if the date is valid
+        if (isNaN(date.getTime())) {
+            throw new Error('Invalid date format');
+        }
+
+        // Extract the year, month, and day
+        const year = date.getFullYear(); // Full year (e.g., 2024)
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+        const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with 0 if needed
+
+        // Format to 'YYYY-MM-DD'
+        return `${year}-${month}-${day}`; // e.g., '2024-10-25'
+    }
+
+    // Kept checkout date for a reason
+    const fixed_checkout_date = convertDateToYYYYMMDD(req.body.checkout_date);
+
     const user_confirmation_data = {
         sender_approval_img: req.file ? req.file.buffer : null,
         image_mime_type: req.file ? req.file.mimetype : null, // Capture the image MIME type
@@ -259,6 +283,13 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
 
     // Access the session user
     const sessionUser = req.session.user;
+
+    // SQL query to update 'available_from' column in the host_listings table
+    const available_from_column_update_query = `
+        UPDATE host_listings
+        SET available_from = ?
+        WHERE id = ?
+    `;
 
     // SQL query to insert the data
     const sql = `INSERT INTO Payment_confirmation (user_id, guest_name, guest_phone_number, payment_approval_image, image_mime_type, place_id, amount_paid, checkin, checkout)
@@ -292,55 +323,65 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
             return res.status(500).send('Error inserting data into the database'); // Send error response
         }
 
-        // Payment Confirmation ID
-        const confirmationId = this.lastID;
-
-        // Execute the query, passing in the listing ID as a parameter
-        lodge_liberia_db.all(images_query, [user_confirmation_data.selected_place_id], (err, rows) => {
+        // Query to update the availabefrom date column from the checkin date of a user booking
+        lodge_liberia_db.run(available_from_column_update_query, [fixed_checkout_date, user_confirmation_data.selected_place_id], function (err) {
             if (err) {
-                console.error("Database error:", err);  // Log any errors encountered during the database query
+                console.error("Error updating user data:", err);
+                return res.status(500).send("Error updating user data.");
             }
 
-            // Check if any rows (images) were returned from the query
-            if (rows.length === 0) {
-                return res.status(404).json({ message: "No images found for this listing." });  // Send a 404 response if no images are found
-            }
 
-            // Map through the rows and convert each image_blob to a Base64 string
-            const images = rows.map(row =>
-                row.image_data ? Buffer.from(row.image_data).toString('base64') : null  // Convert BLOB to Base64, or return null if no BLOB
-            );
+            // Payment Confirmation ID
+            const confirmationId = this.lastID;
 
-            // Execute another query, getting place location
-            lodge_liberia_db.all(place_location_query, [user_confirmation_data.selected_place_id], (err, rows) => {
+            // Execute the query, passing in the listing ID as a parameter
+            lodge_liberia_db.all(images_query, [user_confirmation_data.selected_place_id], (err, rows) => {
                 if (err) {
                     console.error("Database error:", err);  // Log any errors encountered during the database query
                 }
-                const place_location = rows[0].location;
 
-                // Query to retrieve payment confirmation image
-                lodge_liberia_db.get(retrieveImageSql, [confirmationId], (err, row) => {
+                // Check if any rows (images) were returned from the query
+                if (rows.length === 0) {
+                    return res.status(404).json({ message: "No images found for this listing." });  // Send a 404 response if no images are found
+                }
+
+                // Map through the rows and convert each image_blob to a Base64 string
+                const images = rows.map(row =>
+                    row.image_data ? Buffer.from(row.image_data).toString('base64') : null  // Convert BLOB to Base64, or return null if no BLOB
+                );
+
+                // Execute another query, getting place location
+                lodge_liberia_db.all(place_location_query, [user_confirmation_data.selected_place_id], (err, rows) => {
                     if (err) {
-                        return console.error(err.message);
+                        console.error("Database error:", err);  // Log any errors encountered during the database query
                     }
-                    if (row && row.payment_approval_image) {
-                        // Convert BLOB to base64 for display on the client side
-                        const imageBase64 = row.payment_approval_image.toString('base64');
+                    const place_location = rows[0].location;
 
-                        // Successful insertion
-                        console.log(`A row has been inserted with rowid ${this.lastID}`);
-                        res.render('payment_confirmation', {
-                            user: req.session.user, place: images, checkin: user_confirmation_data.checkin_date,
-                            checkout: user_confirmation_data.checkout_date, roundedcost: user_confirmation_data.amount_total,
-                            selected_place_title: user_confirmation_data.selected_place_title, account_owner_name: sessionUser.fullname,
-                            sender_name: user_confirmation_data.sender_name,
-                            registered_phone_number: user_confirmation_data.sender_phone_number,
-                            place_location: place_location, payment_image: imageBase64, image_mime_type: row.image_mime_type // Pass the MIME type to the template
-                        });
+                    // Query to retrieve payment confirmation image
+                    lodge_liberia_db.get(retrieveImageSql, [confirmationId], (err, row) => {
+                        if (err) {
+                            return console.error(err.message);
+                        }
+                        if (row && row.payment_approval_image) {
+                            // Convert BLOB to base64 for display on the client side
+                            const imageBase64 = row.payment_approval_image.toString('base64');
 
-                    }
+                            // Successful insertion
+                            console.log(`A row has been inserted with rowid ${this.lastID}`);
+                            res.render('payment_confirmation', {
+                                user: req.session.user, place: images, checkin: user_confirmation_data.checkin_date,
+                                checkout: user_confirmation_data.checkout_date, roundedcost: user_confirmation_data.amount_total,
+                                selected_place_title: user_confirmation_data.selected_place_title, account_owner_name: sessionUser.fullname,
+                                sender_name: user_confirmation_data.sender_name,
+                                registered_phone_number: user_confirmation_data.sender_phone_number,
+                                place_location: place_location, payment_image: imageBase64, image_mime_type: row.image_mime_type // Pass the MIME type to the template
+                            });
 
+                        }
+
+                    });
                 });
+
             });
 
         });
@@ -349,18 +390,26 @@ server.post('/confirmation', upload.single('sender_approval_image'), (req, res) 
 });
 
 // Host Place Post Route
-server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { name: 'hosting_images[]' }]), (req, res) => {
+server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { name: 'utility_bill' }, { name: 'host_identification_card' }, { name: 'hosting_images[]' }]), (req, res) => {
     // Log the form data to check if everything is received
     // console.log('Form Data:', req.body);
 
-    // // Check if the cover image and additional images are received
-    // console.log('Cover Image:', req.files['host_cover_image']);
-    // console.log('Additional Images:', req.files['hosting_images[]']);
+    // Check if files are received
+    const host_cover_image = req.files['host_cover_image'] ? req.files['host_cover_image'][0] : null; // Cover image
+    const additional_images = req.files['hosting_images[]'] || []; // Additional images
+    const utility_bill_verification = req.files['utility_bill'] ? req.files['utility_bill'][0] : null; // Utility Verification file
+    const host_identification_card = req.files['host_identification_card'] ? req.files['host_identification_card'][0] : null; // Host Verification file, optional
+
+    // Check if necessary files are uploaded
+    if (!host_cover_image || !utility_bill_verification) {
+        console.error("Required files are missing.");
+        return res.status(400).send("Cover image and utility bill are required.");
+    }
 
     const amenities = req.body['allAmenities[][]'];
 
     // Log the amenities received from the form
-    console.log('Amenities:', amenities);
+    // console.log('Amenities:', amenities);
 
     const {
         propertyName,
@@ -376,27 +425,35 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
         detailDescriptionValue,
     } = req.body;
 
-    const host_cover_image = req.files['host_cover_image'][0]; // Cover image
-    const additional_images = req.files['hosting_images[]']; // Additional images
+    // Get the mime type of the cover image and verification files
+    const coverImageMimeType = host_cover_image.mimetype;
+    const utility_bill_verification_mime_type = utility_bill_verification.mimetype;
+    const host_identification_card_mime_type = host_identification_card ? host_identification_card.mimetype : null; // Conditional mime type
 
     // Step 1: Insert data into `host_listings` table
     const insertHostListingQuery = `
         INSERT INTO host_listings 
-        (user_id, title, description, detail_description, location, price_per_night, max_guest, available_from, county, city, property_type, min_stay_days, max_guest, IMAGES, image_mime_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, title, description, detail_description, location, price_per_night, max_guest, available_from, county, city, property_type, min_stay_days, max_guest, IMAGES, image_mime_type, address_verification, address_verification_mime_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    // Step 2: Update data in the `users` table where `id` matches the current user's ID (only if ID card is uploaded)
+    const updateUsersTableQuery = `
+        UPDATE users 
+        SET national_identification_card_verification = ?, 
+            national_identification_card_verification_mime_type = ?
+        WHERE id = ?
     `;
 
     // Access the session user
-    const sessionUser = req.session.user; //logged-in user and their ID is available in `req.user.id`
+    const sessionUser = req.session.user; // Logged-in user and their ID is available in `req.user.id`
     const location = `${address}`; // Combine address details
     const pricePerNight = parseFloat(price);
     const availableFrom = startDate;
     const maxGuestsParsed = parseInt(maxGuests);
     const minStayDaysParsed = parseInt(minStayDays);
 
-    // Get the mime type of the cover image
-    const coverImageMimeType = host_cover_image.mimetype;
-
+    // Insert the host listing
     lodge_liberia_db.run(insertHostListingQuery, [
         sessionUser.id,
         propertyName,
@@ -412,7 +469,9 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
         minStayDaysParsed,
         maxGuestsParsed,
         host_cover_image.buffer, // Cover image as binary data
-        coverImageMimeType // Mime type of the cover image
+        coverImageMimeType, // Mime type of the cover image
+        utility_bill_verification.buffer, // Place verification file as binary
+        utility_bill_verification_mime_type // Place verification file mime code
     ], function (err) {
         if (err) {
             console.error('Error inserting into host_listings:', err);
@@ -420,6 +479,16 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
         }
 
         const hostListingId = this.lastID; // Get the inserted row's ID
+
+        // Update the user's identification card details if the file was uploaded
+        if (host_identification_card) {
+            lodge_liberia_db.run(updateUsersTableQuery, [host_identification_card.buffer, host_identification_card_mime_type, sessionUser.id], function (err) {
+                if (err) {
+                    console.error("Error updating user data:", err);
+                    return res.status(500).send('An error occurred while updating user verification.');
+                }
+            });
+        }
 
         // Step 2: Insert additional images into `host_images` table
         const insertImageQuery = `
@@ -453,11 +522,11 @@ server.post('/submit_property', upload.fields([{ name: 'host_cover_image' }, { n
         });
 
         // After everything is done, respond with success or redirect
-        console.log("Everthing Enter Successfully.");
-        res.render('hosting', {user: req.session.user});
+        console.log("Everything entered successfully.");
+        res.redirect('/hostplace');
+
     });
 });
-
 
 
 // Post Methods ********
@@ -1053,81 +1122,86 @@ function requireLogin(req, res, next) {
 
 // Payment Route
 server.get('/payment', requireLogin, async (req, res) => {
-
-    const selected_place_id = req.query.selected_place_id; // Get the property ID from the URL
-    const selected_place_title = req.query.selected_place_title; // Get the property title from the URL
-
-    const selected_place_total_cost_over_period = req.query.grand_total; // Get the property total cost over period from the URL
-    const selected_place_total_cost_over_period2 = req.query.grand_total2; // Get the property total cost over period from the URL
+    const selected_place_id = req.query.selected_place_id;
+    const selected_place_title = req.query.selected_place_title;
+    const selected_place_total_cost_over_period = req.query.grand_total;
+    const selected_place_total_cost_over_period2 = req.query.grand_total2;
     const roundedcost = Math.ceil(selected_place_total_cost_over_period);
     const roundedcost2 = Math.ceil(selected_place_total_cost_over_period2);
 
-    // Function to format the date as "Month Day, Year"
     function formatDateToReadable(dateStr) {
-        const date = new Date(dateStr); // Convert string to Date object
-        const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Define options for formatting
-        return new Intl.DateTimeFormat('en-US', options).format(date); // Format the date
+        const date = new Date(dateStr);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Intl.DateTimeFormat('en-US', options).format(date);
     }
 
-    // Determine which variable to send to the template
     let displayValue;
     if (roundedcost) {
-        displayValue = roundedcost; // If roundedcost exists, use it
+        displayValue = roundedcost;
     } else if (roundedcost2) {
-        displayValue = roundedcost2; // Otherwise, use roundedcost2
+        displayValue = roundedcost2;
     } else {
-        displayValue = 'No data available'; // Default message if both are null
+        displayValue = 'No data available';
     }
 
-    const checkin = formatDateToReadable(req.query['start-date']); // Get the property checkin dates from the URL
-    const checkout = formatDateToReadable(req.query['end-date']); // Get the property checkout dates from the URL
+    const checkin = formatDateToReadable(req.query['start-date']);
+    const checkout = formatDateToReadable(req.query['end-date']);
 
-
-    // SQL query to select the image blobs from the 'host_images' table where the 'host_listing_id' matches the listing ID
     const query = `SELECT image_data FROM host_images WHERE host_listing_id = ?`;
 
-    // Implementing QR code payment
-
-    // Orange Money QR Payment
     const orange_qr_payment = `*144*1*1*0770722633*${displayValue}#`;
-    // Mobile Money QR Payment
     const mobile_money_qr_payment = `*156*1*1*0881806488*2*${displayValue}#`;
 
-    // QR codes container (Objects)
     const qr_codes = {};
 
-    // Function to generate QR code
     try {
-        // Generate QR code for Orange Money
+        // Generate QR codes
         qr_codes.orange_money = await QRCode.toDataURL(orange_qr_payment);
-
-        // Generate QR code for Mobile Money
         qr_codes.mobile_money = await QRCode.toDataURL(mobile_money_qr_payment);
+
+        // Promisify the database query
+        const images = await new Promise((resolve, reject) => {
+            lodge_liberia_db.all(query, [selected_place_id], (err, rows) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (rows.length === 0) {
+                    return reject(new Error('No images found for this listing.'));
+                }
+
+                const imagesBase64 = rows.map(row =>
+                    row.image_data ? Buffer.from(row.image_data).toString('base64') : null
+                );
+
+                resolve(imagesBase64);
+            });
+        });
+
+        // Render the template after everything is done
+        res.render('lodgeliberia_payment', {
+            user: req.session.user,
+            place: images,
+            selected_place_title,
+            checkin,
+            checkout,
+            roundedcost,
+            roundedcost2,
+            qr_codes,
+            selected_place_id
+        });
+
+    } catch (err) {
+        console.error("Error in /payment route:", err);
+        return res.status(500).send('An error occurred during the payment process.');
     }
-    catch (err) {
-        console.log(err);
-        return res.status(500).send('Error generating QR codes');
-    }
+});
 
-    // Execute the query, passing in the listing ID as a parameter
-    lodge_liberia_db.all(query, [selected_place_id], (err, rows) => {
-        if (err) {
-            console.error("Database error:", err);  // Log any errors encountered during the database query
-        }
+// Global handler for unhandled promise rejections (temporary for debugging)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
-        // Check if any rows (images) were returned from the query
-        if (rows.length === 0) {
-            return res.status(404).json({ message: "No images found for this listing." });  // Send a 404 response if no images are found
-        }
-
-        // Map through the rows and convert each image_blob to a Base64 string
-        const images = rows.map(row =>
-            row.image_data ? Buffer.from(row.image_data).toString('base64') : null  // Convert BLOB to Base64, or return null if no BLOB
-        );
-
-        res.render('lodgeliberia_payment', { user: req.session.user, place: images, selected_place_title, checkin, checkout, roundedcost, roundedcost2, qr_codes, selected_place_id });
-    });
-})
 
 
 // Host Place Route
@@ -1137,80 +1211,103 @@ server.get('/hostplace', requireLogin, (req, res) => {
     req.session.returnTo = req.originalUrl;
 
     // Access the session user
-    const sessionUser = req.session.user; //logged-in user and their ID is available in `req.user.id`
+    const sessionUser = req.session.user;
 
-    // User places hosted
+    // SQL query to check if the national_identification_card_verification is NULL
+    const checkIdVerificationQuery = `
+        SELECT national_identification_card_verification 
+        FROM users 
+        WHERE id = ?
+    `;
+
+    // SQL query for the user's hosted places
     const user_places_hosted = `
-                 SELECT 
-                users.fullname AS host_name,
-                host_listings.title AS property_title,
-                host_listings.id AS property_id,
-                host_listings.description AS property_description,
-                host_listings.price_per_night AS property_price_per_night,
-                host_listings.Images AS images,
-                host_listings.image_mime_type AS image_mime_type,
-                host_listings.available_from,
-                -- Formatting the available_from date for better readability
-                CASE strftime('%m', host_listings.available_from)
-                    WHEN '01' THEN 'January'
-                    WHEN '02' THEN 'February'
-                    WHEN '03' THEN 'March'
-                    WHEN '04' THEN 'April'
-                    WHEN '05' THEN 'May'
-                    WHEN '06' THEN 'June'
-                    WHEN '07' THEN 'July'
-                    WHEN '08' THEN 'August'
-                    WHEN '09' THEN 'September'
-                    WHEN '10' THEN 'October'
-                    WHEN '11' THEN 'November'
-                    WHEN '12' THEN 'December'
-                END AS available_month,
-                strftime('%d', host_listings.available_from) AS available_day,
-                strftime('%Y', host_listings.available_from) AS available_year
-            FROM users
-            JOIN host_listings ON users.id = host_listings.user_id
-            WHERE users.id = ${sessionUser.id}
-            `;
+        SELECT 
+            users.fullname AS host_name,
+            host_listings.title AS property_title,
+            host_listings.id AS property_id,
+            host_listings.description AS property_description,
+            host_listings.price_per_night AS property_price_per_night,
+            host_listings.Images AS images,
+            host_listings.image_mime_type AS image_mime_type,
+            host_listings.available_from,
+            CASE strftime('%m', host_listings.available_from)
+                WHEN '01' THEN 'January'
+                WHEN '02' THEN 'February'
+                WHEN '03' THEN 'March'
+                WHEN '04' THEN 'April'
+                WHEN '05' THEN 'May'
+                WHEN '06' THEN 'June'
+                WHEN '07' THEN 'July'
+                WHEN '08' THEN 'August'
+                WHEN '09' THEN 'September'
+                WHEN '10' THEN 'October'
+                WHEN '11' THEN 'November'
+                WHEN '12' THEN 'December'
+            END AS available_month,
+            strftime('%d', host_listings.available_from) AS available_day,
+            strftime('%Y', host_listings.available_from) AS available_year
+        FROM users
+        JOIN host_listings ON users.id = host_listings.user_id
+        WHERE users.id = ?
+    `;
 
-
-    // Query the database for amenities
-    const query = `SELECT feature FROM places_features`; // Adjust the table/column names to match your DB
-    lodge_liberia_db.all(query, [], (err, amenities) => {
+    // First, check if the user has uploaded their identification card
+    lodge_liberia_db.get(checkIdVerificationQuery, [sessionUser.id], (err, result) => {
         if (err) {
-            console.error('Error fetching amenities:', err);
-            return res.status(500).send('Error fetching amenities');
+            console.error('Error checking ID verification:', err);
+            return res.status(500).send('Error checking ID verification');
         }
 
-        // Fifth query to get only Rooms
-        lodge_liberia_db.all(user_places_hosted, [], (err, rooms_Rows) => {
-            if (err) throw err;
+        // Check if the national_identification_card_verification is NULL
+        const isIdCardUploaded = result.national_identification_card_verification !== null;
 
-            // Process Rooms rows and store in results object
-            const host_property = rooms_Rows.map(row => ({
-                host_name: row.host_name,
-                host_place_id: row.property_id,
-                property_title: row.property_title,
-                property_description: row.property_description,
-                property_price_per_night: row.property_price_per_night,
-                available_month: row.available_month,
-                available_day: row.available_day,
-                available_year: row.available_year,
-                image_mime_type: row.image_mime_type,
-                // Convert BLOB image data to Base64 (if available)
-                base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
-            }));
+        // Query the database for amenities
+        const query = `SELECT feature FROM places_features`;
 
-            // Render the hosting view and pass the user and amenities
-            res.render('hosting', {
-                user: req.session.user,
-                place: host_property,
-                amenities: amenities // Pass the amenities to the template
+        // Fetch amenities
+        lodge_liberia_db.all(query, [], (err, amenities) => {
+            if (err) {
+                console.error('Error fetching amenities:', err);
+                return res.status(500).send('Error fetching amenities');
+            }
+
+            // Fetch user's hosted places
+            lodge_liberia_db.all(user_places_hosted, [sessionUser.id], (err, rooms_Rows) => {
+                if (err) {
+                    console.error('Error fetching properties:', err);
+                    return res.status(500).send('Error fetching properties');
+                }
+
+                // Define host_property based on the query results
+                const host_property = rooms_Rows.length > 0
+                    ? rooms_Rows.map(row => ({
+                        host_name: row.host_name,
+                        host_place_id: row.property_id,
+                        property_title: row.property_title,
+                        property_description: row.property_description,
+                        property_price_per_night: row.property_price_per_night,
+                        available_month: row.available_month,
+                        available_day: row.available_day,
+                        available_year: row.available_year,
+                        image_mime_type: row.image_mime_type,
+                        base64Image: row.images ? Buffer.from(row.images).toString('base64') : null
+                    }))
+                    : [];
+
+                // Render the hosting view and pass the user, host_property, amenities, and whether the ID card is uploaded
+                res.render('hosting', {
+                    user: req.session.user,
+                    host_property: host_property || [], // Will be an empty array if no properties
+                    amenities,
+                    isIdCardUploaded // Pass this variable to conditionally show/hide the input
+                });
             });
-
-        })
-
+        });
     });
 });
+
+
 
 
 // User Profile Route
@@ -1248,7 +1345,7 @@ server.get('/my_profile', requireLogin, (req, res) => {
             host_age: row.host_age,
         }));
 
-        console.log(host_detail);
+        // console.log(host_detail);
 
         res.render('my_profile', { user: req.session.user, place: host_detail });
 
@@ -1368,6 +1465,11 @@ server.get('/logout', (req, res) => {
         res.clearCookie('connect.sid');  // 'connect.sid' is the default session cookie name
         res.redirect('/');  // Redirect the user to the login page
     });
+});
+
+// Contact US Route
+server.get('/contact', requireLogin, (req, res) => {
+    res.render('contact_us', { user: req.session.user});
 });
 
 

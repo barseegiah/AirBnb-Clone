@@ -18,5 +18,8 @@
     "nodemon": "^3.1.4",
     "qrcode": "^1.5.4",
     "sqlite3": "^5.1.7"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }
